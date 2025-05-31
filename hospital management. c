@@ -1,0 +1,111 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+struct Patient {
+    int id;
+    char name[50];
+    int age;
+    char gender[10];
+    char diagnosis[100];
+};
+
+void addPatient();
+void viewPatients();
+void searchPatient();
+
+int main() {
+    int choice;
+
+    do {
+        printf("\n=== Hospital Management System ===\n");
+        printf("1. Add Patient\n");
+        printf("2. View All Patients\n");
+        printf("3. Search Patient by ID\n");
+        printf("4. Exit\n");
+        printf("Choose an option: ");
+        scanf("%d", &choice);
+
+        switch(choice) {
+            case 1: addPatient(); break;
+            case 2: viewPatients(); break;
+            case 3: searchPatient(); break;
+            case 4: printf("Exiting program.\n"); break;
+            default: printf("Invalid choice! Try again.\n");
+        }
+
+    } while(choice != 4);
+
+    return 0;
+}
+
+void addPatient() {
+    FILE *file = fopen("patients.dat", "ab");
+    struct Patient p;
+
+    if (!file) {
+        printf("Error opening file!\n");
+        return;
+    }
+
+    printf("Enter ID: ");
+    scanf("%d", &p.id);
+    printf("Enter Name: ");
+    scanf(" %[^\n]", p.name);
+    printf("Enter Age: ");
+    scanf("%d", &p.age);
+    printf("Enter Gender: ");
+    scanf(" %[^\n]", p.gender);
+    printf("Enter Diagnosis: ");
+    scanf(" %[^\n]", p.diagnosis);
+
+    fwrite(&p, sizeof(p), 1, file);
+    fclose(file);
+    printf("Patient added!\n");
+}
+
+void viewPatients() {
+    FILE *file = fopen("patients.dat", "rb");
+    struct Patient p;
+
+    if (!file) {
+        printf("No records found.\n");
+        return;
+    }
+
+    printf("\n--- Patient List ---\n");
+    while (fread(&p, sizeof(p), 1, file)) {
+        printf("\nID: %d\nName: %s\nAge: %d\nGender: %s\nDiagnosis: %s\n",
+               p.id, p.name, p.age, p.gender, p.diagnosis);
+    }
+    fclose(file);
+}
+
+void searchPatient() {
+    FILE *file = fopen("patients.dat", "rb");
+    struct Patient p;
+    int id, found = 0;
+
+    if (!file) {
+        printf("No records found.\n");
+        return;
+    }
+
+    printf("Enter ID to search: ");
+    scanf("%d", &id);
+
+    while (fread(&p, sizeof(p), 1, file)) {
+        if (p.id == id) {
+            printf("\n--- Patient Found ---\n");
+            printf("ID: %d\nName: %s\nAge: %d\nGender: %s\nDiagnosis: %s\n",
+                   p.id, p.name, p.age, p.gender, p.diagnosis);
+            found = 1;
+            break;
+        }
+    }
+
+    if (!found) {
+        printf("Patient not found.\n");
+    }
+
+    fclose(file);
+}
